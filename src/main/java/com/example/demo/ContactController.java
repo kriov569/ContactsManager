@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+import java.nio.channels.MulticastChannel;
 import java.util.Optional;
 
 @RestController
@@ -36,6 +39,16 @@ public class ContactController {
             return ResponseEntity.ok(updatedContact);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadCSVFile(@RequestParam("file")MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) {
+            service.loadContactsFromCSV(inputStream);
+            return ResponseEntity.ok("Контакты успешно загружены");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка загрузки файла");
         }
     }
 }
